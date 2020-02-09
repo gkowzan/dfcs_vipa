@@ -13,7 +13,7 @@ from dfcs_vipa import collect
 from dfcs_vipa import grid
 import dfcs_vipa.lineshape as ls
 from dfcs_vipa.data.cmws import knots
-from shed.experiment import find_maxima, denser, expand, remove_close, fwhm_est
+from dfcs_vipa.experiment import find_maxima, denser, expand, remove_close, fwhm_est
 
 log = logging.getLogger(__name__)
 logging.basicConfig(
@@ -51,7 +51,7 @@ def hdf5old2new_copy(path):
                 done = True
 
     if done:
-        p2.rename(path)
+        p2.replace(path)
 
 
 def dir_hdf5old2new_copy(path):

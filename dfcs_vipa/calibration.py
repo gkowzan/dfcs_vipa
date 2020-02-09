@@ -18,9 +18,8 @@ from lxml import etree
 import numpy as np
 from scipy.optimize import curve_fit, least_squares
 from scipy.interpolate import (interp1d, splrep, splev)
-import matplotlib.pyplot as plt
-from pydfcs.cmws import average_h5
-from shed.experiment import smooth, find_index
+from dfcs_vipa.collect import average_h5
+from dfcs_vipa.experiment import smooth, find_index
 
 log = logging.getLogger(__name__)
 default_nodes = np.hstack([
@@ -467,9 +466,9 @@ class DirectCalibration(ReadDataMixin):
         a = curve_fit(linear, x, y)[0][0]
         # popt = curve_fit(rational, x, y, p0=(1, 1, 1, 1000))[0]
 
-        plt.figure()
-        plt.plot(times, powers, label='data')
-        plt.plot(times, linear(times, a), label='initial fit')
+        # plt.figure()
+        # plt.plot(times, powers, label='data')
+        # plt.plot(times, linear(times, a), label='initial fit')
         # plt.plot(times, rational(times, *popt), label='initial fit')
 
         res = linear(times, a)/powers
@@ -483,12 +482,12 @@ class DirectCalibration(ReadDataMixin):
         # res_smooth[:i_500] = res_smooth[:i_500]*0.95
         res_smooth = res_smooth
 
-        plt.figure()
-        plt.plot(powers, res)
-        plt.plot(powers, res_smooth)
+        # plt.figure()
+        # plt.plot(powers, res)
+        # plt.plot(powers, res_smooth)
 
-        plt.figure()
-        plt.plot(powers, res-res_smooth)
+        # plt.figure()
+        # plt.plot(powers, res-res_smooth)
 
         self.cal_func = interp1d(powers, res_smooth,
                                  assume_sorted=False,

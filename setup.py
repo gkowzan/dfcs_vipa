@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md')) as f:
 setup(
     name='dfcs_vipa',
     version='1.0.0',
-    description="Frequency comb spectroscopy with VIPA",
+    description="Direct frequency comb spectroscopy with a VIPA spectrograph",
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://bitbucket.org/yoreh/dfcs_vipa',

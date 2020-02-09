@@ -1,7 +1,5 @@
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from dfcs_vipa import grid
 
 log = logging.getLogger(__name__)
@@ -21,6 +19,9 @@ def grid_overlay(frame, fancy_grid, rio=None):
     Returns:
     - matplotlib figure object
     """
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+
     grid_map = grid.make_grid_map(*fancy_grid)
     grid_map = np.ma.masked_where(grid_map == False, grid_map)
 

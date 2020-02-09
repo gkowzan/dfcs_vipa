@@ -15,7 +15,7 @@ from scipy.special import erfcx
 import scipy.constants as C
 from scipy.optimize import curve_fit
 # my own
-from shed.units import wn2nu, nu2wn
+from dfcs_vipa.units import wn2nu, nu2wn
 c = C.c
 N_A = C.N_A
 k = C.k

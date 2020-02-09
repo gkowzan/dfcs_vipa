@@ -1,7 +1,7 @@
 import logging
 import numpy as np
-from shed.experiment import find_maxima, find_index
-from shed.units import nu2wn, nu2lambda, lambda2nu
+from dfcs_vipa.experiment import find_maxima, find_index
+from dfcs_vipa.units import nu2wn, nu2lambda, lambda2nu
 
 log = logging.getLogger(__name__)
 
