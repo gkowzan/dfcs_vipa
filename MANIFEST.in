@@ -1,0 +1,4 @@
+include *.md
+include LICENSE.txt
+include environment.yml
+include requirements.txt
