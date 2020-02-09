@@ -254,9 +254,7 @@ def closest_to_rio(rio, fancy_grid):
     """Return the grid index of the tooth closest to RIO position."""
     rows, cols = fancy_grid
     selector = np.where(cols == rio[1])[0]
-    print(selector)
     rows_limited = rows[selector]
-    print(rows_limited)
     i_tooth = find_index(rows_limited, rio[0])
 
     return selector[i_tooth]
