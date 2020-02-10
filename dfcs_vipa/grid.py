@@ -109,7 +109,7 @@ def limit_grid_trapz(points, rows, cols=(0, dfcs_vipa.COLS)):
             and p[1] > cols[0] and p[1] < cols[1]]
 
 
-def collect_column(arr, start_row, start_col):
+def collect_column(arr, start_row, start_col, row_min, row_max):
     """Follow the VIPA stripe and return coords lying on it.
 
     The tracking procedure starts at (`start_row`, `start_col`) and goes
@@ -142,15 +142,27 @@ def collect_column(arr, start_row, start_col):
     points = []
 
     col = start_col
-    for row in range(start_row, -1, -1):
-        strip = arr[row, col-rad:col+rad+1]
+    for row in range(start_row, row_min-1, -1):
+        left_lim = col-rad if col-rad>0 else 0
+        right_lim = col+rad+1 if col+rad+1 < dfcs_vipa.COLS else dfcs_vipa.COLS
+        strip = arr[row, left_lim:right_lim]
         col = col-rad + np.argmax(strip)
+        if col < 0:
+            col = 0
+        elif col >= dfcs_vipa.COLS:
+            col = dfcs_vipa.COLS - 1
         points.append((row, col))
 
     col = start_col
-    for row in range(start_row, ROWS):
-        strip = arr[row, col-rad:col+rad+1]
+    for row in range(start_row+1, row_max):
+        left_lim = col-rad if col-rad>0 else 0
+        right_lim = col+rad+1 if col+rad+1 < dfcs_vipa.COLS else dfcs_vipa.COLS
+        strip = arr[row, left_lim:right_lim]
         col = col-rad + np.argmax(strip)
+        if col < 0:
+            col = 0
+        elif col >= dfcs_vipa.COLS:
+            col = dfcs_vipa.COLS - 1
         points.append((row, col))
 
     return points
@@ -185,11 +197,14 @@ def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
         the points lying on the stripes (diffraction orders) comprising
         the VIPA spectrometer diffraction pattern.
     """
-    columns = find_maxima(arr[start_row, :], window_len=1, thres=0, order=2)
+    # threshold = np.mean(arr[-1, :])
+    row_min, row_max = np.min(rio_rows), np.max(rio_rows)
+    start_row = (row_max+row_min)//2
+    columns = find_maxima(arr[start_row, :], window_len=1, thres=0, order=2)[1:-1]
     grid_points = []
 
     for start_col in columns:
-        points = collect_column(arr, start_row, start_col)
+        points = collect_column(arr, start_row, start_col, row_min, row_max)
         points.sort(key=lambda x: dfcs_vipa.ROWS-1-x[0])
         grid_points.extend(points)
 
