@@ -1,10 +1,9 @@
 import logging
 import numpy as np
 from dfcs_vipa import grid
+import dfcs_vipa
 
 log = logging.getLogger(__name__)
-
-ROWS, COLS = 256, 320
 
 
 def grid_overlay(frame, fancy_grid, rio=None):
@@ -25,7 +24,7 @@ def grid_overlay(frame, fancy_grid, rio=None):
     grid_map = grid.make_grid_map(*fancy_grid)
     grid_map = np.ma.masked_where(grid_map == False, grid_map)
 
-    rio_stripes = np.zeros((ROWS, COLS), dtype=np.bool)
+    rio_stripes = np.zeros((dfcs_vipa.ROWS, dfcs_vipa.COLS), dtype=np.bool)
     if rio is not None:
         rio_stripes[rio[0], :] = True
         rio_stripes[rio[1], :] = True

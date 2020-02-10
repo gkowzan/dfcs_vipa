@@ -14,6 +14,7 @@ from dfcs_vipa import grid
 import dfcs_vipa.lineshape as ls
 from dfcs_vipa.data.cmws import knots
 from dfcs_vipa.experiment import find_maxima, denser, expand, remove_close, fwhm_est
+import dfcs_vipa
 
 log = logging.getLogger(__name__)
 logging.basicConfig(
@@ -31,7 +32,8 @@ def hdf5old2new_copy(path):
                 log.debug("all at once")
                 f2.require_dataset("data",
                                    f1['data'].shape,
-                                   maxshape=(None, 256, 320),
+                                   maxshape=(None, dfcs_vipa.ROWS,
+                                             dfcs_vipa.COLS),
                                    dtype='u2', compression='lzf')
                 f2["data"][...] = f1["data"][...]
                 done = True
@@ -39,11 +41,14 @@ def hdf5old2new_copy(path):
                 log.debug("one by one")
                 length = sum(1 for _ in f1.keys())
                 f2.require_dataset("data",
-                                   (length, 256, 320),
-                                   maxshape=(None, 256, 320),
+                                   (length, dfcs_vipa.ROWS,
+                                    dfcs_vipa.COLS),
+                                   maxshape=(None, dfcs_vipa.ROWS,
+                                             dfcs_vipa.COLS),
                                    dtype='u2', compression='lzf')
                 # read in all data
-                temp = np.empty((length, 256, 320), dtype='u2')
+                temp = np.empty((length, dfcs_vipa.ROWS, dfcs_vipa.COLS),
+                                dtype='u2')
                 for name in f1.keys():
                     num = int(name)
                     temp[num] = f1[name][...]
@@ -86,10 +91,10 @@ def get_rio_pos_file(rio, rio_dc):
         collect.average_h5(rio, rio_dc))
 
 
-def make_grid_file(grid_file, grid_dc):
+def make_grid_file(grid_file, grid_dc, rio_rows=np.array([0, dfcs_vipa.ROWS])):
     return grid.make_grid(
-        collect.average_h5(grid_file, grid_dc
-        ))
+        collect.average_h5(grid_file, grid_dc),
+        rio_rows)
 
 
 #########################################################################

@@ -1,10 +1,9 @@
 import logging
 import h5py as h5
 import numpy as np
-
+import dfcs_vipa
 
 log = logging.getLogger(__name__)
-ROWS, COLS = 256, 320
 
 
 # * Collect arrays and comb teeth intensities
@@ -120,7 +119,7 @@ def collect_multi(ilist, fmt, fmt_dc):
       and the last two corresponding to camera frame dimensions.
     """
     ilength = len(ilist)
-    multi_arr = np.empty((ilength, ROWS, COLS))
+    multi_arr = np.empty((ilength, dfcs_vipa.ROWS, dfcs_vipa.COLS))
     for j, i in enumerate(ilist):
         log.info("Averaging '{:s}'".format(fmt.format(i)))
         multi_arr[j] = average_h5(fmt.format(i), fmt_dc.format(i))
@@ -151,7 +150,7 @@ def collect_multi_single(ilist, fmt, fmt_dc):
     ilength = len(ilist)
     with h5.File(fmt.format(ilist[0]), 'r') as test_file:
         frame_num = test_file['data'].shape[0]
-    multi_arr = np.empty((ilength, frame_num, ROWS, COLS))
+    multi_arr = np.empty((ilength, frame_num, dfcs_vipa.ROWS, dfcs_vipa.COLS))
     for j, i in enumerate(ilist):
         log.info("Collecting '{:s}'".format(fmt.format(i)))
         multi_arr[j] = collect_h5(fmt.format(i), fmt_dc.format(i))

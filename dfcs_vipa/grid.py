@@ -2,10 +2,9 @@ import logging
 import numpy as np
 from dfcs_vipa.experiment import find_maxima, find_index
 from dfcs_vipa.units import nu2wn, nu2lambda, lambda2nu
+import dfcs_vipa
 
 log = logging.getLogger(__name__)
-
-ROWS, COLS = 256, 320
 
 
 def get_rio_pos(arr):
@@ -26,16 +25,17 @@ def get_rio_pos(arr):
         to the CW peak with lower row value, i.e. the peak which is
         higher in the camera image.
     """
-    row_min, row_max = np.argmax(arr[:128, :]), np.argmax(arr[128:, :])
+    half_row = dfcs_vipa.ROWS//2
+    row_min, row_max = np.argmax(arr[:half_row, :]), np.argmax(arr[half_row:, :])
     rows, cols = np.unravel_index(
         (row_min, row_max), arr.shape
     )
-    rows -= 1; rows[1] += 128
+    rows -= 1; rows[1] += half_row
 
     return rows, cols
 
 
-def limit_grid(points, rows, cols=(0, COLS)):
+def limit_grid(points, rows, cols=(0, dfcs_vipa.COLS)):
     """Removes grid points outside the rectangle defined by `rows` and
     `cols`.
 
@@ -67,7 +67,7 @@ def limit_grid(points, rows, cols=(0, COLS)):
             and p[1] > cols[0] and p[1] < cols[1]]
 
 
-def limit_grid_trapz(points, rows, cols=(0, COLS)):
+def limit_grid_trapz(points, rows, cols=(0, dfcs_vipa.COLS)):
     """Removes grid points outside the trapezoid defined by `rows` and `cols`.
 
     Parameters
@@ -94,13 +94,13 @@ def limit_grid_trapz(points, rows, cols=(0, COLS)):
 
     def row_max(col):
         intercept = u_min
-        slope = (u_max-u_min)/COLS
+        slope = (u_max-u_min)/dfcs_vipa.COLS
 
         return np.round(intercept + slope*col).astype(np.int)
 
     def row_min(col):
         intercept = l_min
-        slope = (l_max-l_min)/COLS
+        slope = (l_max-l_min)/dfcs_vipa.COLS
 
         return np.round(intercept - slope*col).astype(np.int)
 
@@ -156,7 +156,7 @@ def collect_column(arr, start_row, start_col):
     return points
 
 
-def make_grid(arr, start_row=125):
+def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
     """Find coordinates lying on each VIPA diffraction order.
 
     The resultant grid of points is used in further data analysis to
@@ -190,7 +190,7 @@ def make_grid(arr, start_row=125):
 
     for start_col in columns:
         points = collect_column(arr, start_row, start_col)
-        points.sort(key=lambda x: ROWS-1-x[0])
+        points.sort(key=lambda x: dfcs_vipa.ROWS-1-x[0])
         grid_points.extend(points)
 
     # return the points ascending in frequency
@@ -337,7 +337,7 @@ def teeth_per_stripe(fancy_grid):
 def make_grid_map(rows, cols):
     """Make a 2D bool array for visualizing VIPA diffraction pattern.
     """
-    arr = np.zeros((ROWS, COLS), dtype=np.bool)
+    arr = np.zeros((dfcs_vipa.ROWS, dfcs_vipa.COLS), dtype=np.bool)
     arr[rows, cols] = True
 
     return arr

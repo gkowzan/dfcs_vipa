@@ -20,6 +20,7 @@ from scipy.optimize import curve_fit, least_squares
 from scipy.interpolate import (interp1d, splrep, splev)
 from dfcs_vipa.collect import average_h5
 from dfcs_vipa.experiment import smooth, find_index
+import dfcs_vipa
 
 log = logging.getLogger(__name__)
 default_nodes = np.hstack([
@@ -605,7 +606,7 @@ class PixelCalibrate(ReadDataMixin):
         log.info(('fitting pixel nonlinearity, '
                   'initial range: {!r}').format(init_range))
         self.calibration = dict()
-        for i, j in product(range(256), range(320)):
+        for i, j in product(range(dfcs_vipa.ROWS), range(dfcs_vipa.COLS)):
             if (i, j) in self.mask:
                 log.info('skipping pixel ({:d}, {:d})'.format(i, j))
             else:
