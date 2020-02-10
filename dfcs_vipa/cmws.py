@@ -154,7 +154,6 @@ def vp(x, x0, gam, dop):
     return wofz(((x - x0) + 1j*gam)/sigma)/sigma/np.sqrt(np.pi)
 
 
-
 def voigt(x, x0, gamma, dop, a):
     """Return the Voigt profile (the real part)."""
     return a*np.real(vp(x, x0, gamma, dop))
