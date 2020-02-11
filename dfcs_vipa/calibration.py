@@ -164,8 +164,8 @@ class RatioCalibration(ReadDataMixin):
         else:
             self.skip_initial = True
             self.initial_coeffs = initial_coeffs
-        self._window = (slice(None, 256), slice(None, 320))
-        self.total = 256*320
+        self._window = (slice(None, dfcs_vipa.ROWS), slice(None, dfcs_vipa.COLS))
+        self.total = dfcs_vipa.ROWS*dfcs_vipa.COLS
         self.res = None
 
     def corr_func(self, coeffs, x):
@@ -580,7 +580,7 @@ class PixelCalibrate(ReadDataMixin):
 
     def read_cameras(self):
         log.info('reading camera averages')
-        self.cameras = np.empty((len(self.fmt_list), 256, 320))
+        self.cameras = np.empty((len(self.fmt_list), dfcs_vipa.ROWS, dfcs_vipa.COLS))
         for i, num in enumerate(self.fmt_list, start=0):
             self.cameras[i] = self.read_cam_avg(num)
         # self.cameras[0] = 0.0
