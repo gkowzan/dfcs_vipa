@@ -4,6 +4,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 
 
+# * Miscellaneous
 def remove_close(maxima, distance, *arrays):
     """Remove points in `maxima` which are closer than `distance`.
 
@@ -265,3 +266,70 @@ def struct2dict(struct, d=None, exclude=tuple()):
                 d[field] = struct[field][0]
 
     return d
+
+
+# * Allan deviation
+def _square_difference(j, arr, tau):
+    return (arr[(j+1)*tau:(j+2)*tau].mean()-arr[j*tau:(j+1)*tau].mean())**2
+
+
+def _allan_tau(arr, tau):
+    n = arr.size//tau-1
+    r = 0.0
+
+    for j in range(n):
+        r += _square_difference(j, arr, tau)
+
+    return r/2/n
+
+
+def allan_points(N):
+    """Allan deviation averaging spans for N-sized sample.
+
+    Allan deviation for the longest averaging span is calculated based
+    on at least 5 spans.
+
+    Parameters
+    ----------
+    N : int
+        Number of samples.
+
+    Returns
+    --------
+    ns : ndarray
+        Averaging spans.
+
+    """
+    max_n = N//5
+    cur_p = 0
+    max_p = np.int(np.log10(max_n))
+    ns = []
+    while cur_p <= max_p:
+        for i in range(1, 10):
+            n = i*10**cur_p
+            if n <= max_n:
+                ns.append(n)
+        cur_p += 1
+
+    return np.array(ns)
+
+
+def allan_variance(arr):
+    """Returns Allan variance of samples in `arr`.
+
+    Values in array are taken as corresponding to consecutive and evenly
+    spaced time periods.  Variance is calculated for averaging spans between 1 and
+    arr.size//5-long, with 10 points per order of magnitude.
+    """
+    points = allan_points(arr.size)
+    r = np.empty(points.size, dtype=np.double)
+    for tau, i in zip(points, range(points.size)):
+        r[i] = _allan_tau(arr, tau)
+
+    return points, r
+
+
+def allan_deviation(arr):
+    points, avar = allan_variance(arr)
+
+    return points, np.sqrt(avar)
