@@ -333,3 +333,49 @@ def allan_deviation(arr):
     points, avar = allan_variance(arr)
 
     return points, np.sqrt(avar)
+
+
+# * LabView arrays
+def read1dlv(filename):
+    """Read LabView 1D array and return as numpy array.
+
+    Little-endian version.
+    """
+    if isinstance(filename, str):
+        f = open(filename, 'rb')
+    else:
+        f = filename
+    dim = np.fromstring(f.read(4), dtype=np.dtype('u4'))
+    arr = np.fromstring(f.read(), count=dim[0], dtype=np.float)
+
+    return arr
+
+
+def read2dlv(filename):
+    """Read LabView 2D array and return as numpy array.
+
+    Big-endian version.
+    """
+    if isinstance(filename, str):
+        f = open(filename, 'rb')
+    else:
+        f = filename
+    dims = np.fromstring(f.read(8), dtype=np.dtype('>u4'))
+    ccd_temp = np.fromstring(f.read(), dtype=np.dtype('>u2'))
+    ccd_arr = ccd_temp.astype(np.uint16).reshape(dims)
+    f.close()
+
+    return ccd_arr
+
+
+def write2dlv(arr, filename):
+    """Write numpy array to file in LabView format."""
+    if isinstance(filename, str):
+        with open(filename, 'w'):
+            pass
+        f = open(filename, 'a')
+    else:
+        f = filename
+    np.array(arr.shape, dtype=np.dtype('>u4')).tofile(f)
+    arr.astype('>u2', copy=False).tofile(f)
+    f.close()
