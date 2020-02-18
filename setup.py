@@ -27,4 +27,9 @@ setup(
     extras_require={'doc': ['sphinx', 'sphinx_rtd_theme', 'numpydoc'],
                     'plot': ['matplotlib']},
     packages=find_packages(),
+    entry_points={
+        "console_scripts": [
+            "labview_grid = dfcs_vipa.scripts.labview_grid:main",
+            "combwatch = dfcs_vipa.scripts.combwatch:main",
+            "hdf5_convert = dfcs_vipa.scripts.hdf5_convert:main"]}
 )
