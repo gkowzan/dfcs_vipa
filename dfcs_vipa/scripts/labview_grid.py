@@ -30,13 +30,22 @@ def main():
 
     dfcs_vipa.ROWS = args.rows
     dfcs_vipa.COLS = args.cols
+
     # determine the grid
-    cw_arr = collect.average_h5(
-        args.cw_marker, args.cw_marker_dc)
+    cw_lab = Path(args.cw_marker).with_suffix('.dat')
+    if cw_lab.exists():
+        cw_arr = ex.read2dlv(str(cw_lab))
+    else:
+        cw_arr = collect.average_h5(
+            args.cw_marker, args.cw_marker_dc)
     cw_pos = grid.get_rio_pos(cw_arr)
 
-    grid_arr = collect.average_h5(
-        args.broadband, args.broadband_dc)
+    grid_lab = Path(args.broadband).with_suffix('.dat')
+    if grid_lab.exists():
+        grid_arr = ex.read2dlv(str(grid_lab))
+    else:
+        grid_arr = collect.average_h5(
+            args.broadband, args.broadband_dc)
     grid_points = grid.limit_grid(
         grid.make_grid(grid_arr, cw_pos[0]),
         cw_pos[0], (args.col_min, args.col_max))
@@ -45,8 +54,8 @@ def main():
         grid_fancy, cw_pos, args.fsr, args.cw_wavelength*1e-9)
 
     # save averaged arrray
-    ex.write2dlv(cw_arr, str(Path(args.cw_marker).with_suffix('.dat')))
-    ex.write2dlv(grid_arr, str(Path(args.broadband).with_suffix('.dat')))
+    ex.write2dlv(cw_arr, str(cw_lab))
+    ex.write2dlv(grid_arr, str(grid_lab))
 
     # save LabView data
     np.savetxt(Path(args.broadband).with_name('grid.csv'),
