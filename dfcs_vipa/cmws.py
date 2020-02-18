@@ -46,13 +46,9 @@ def hdf5old2new_copy(path):
                                    maxshape=(None, dfcs_vipa.ROWS,
                                              dfcs_vipa.COLS),
                                    dtype='u2', compression='lzf')
-                # read in all data
-                temp = np.empty((length, dfcs_vipa.ROWS, dfcs_vipa.COLS),
-                                dtype='u2')
                 for name in f1.keys():
                     num = int(name)
-                    temp[num] = f1[name][...]
-                f2['data'][...] = temp[...]
+                    f2['data'][num, ...] = f1[name][...]
                 done = True
 
     if done:
