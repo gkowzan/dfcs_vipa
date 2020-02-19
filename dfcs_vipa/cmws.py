@@ -22,33 +22,70 @@ logging.basicConfig(
     format='%(name)s: %(message)s',
 )
 
+def hdf5old2new_copy(path, chunkbytes=100*2**20):
+    """Convert and compress HDF5 measurement data in chunks.
 
-def hdf5old2new_copy(path):
+    The larger the `chunkbytes` parameter the faster the conversion.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Path to HDF5 file.
+    chunkbytes : int
+        Amount of bytes to copy at a time.
+    """
+    ROWS, COLS = dfcs_vipa.ROWS, dfcs_vipa.COLS
     done = False
     p2 = Path(path).with_suffix('.tmp')
     with h5.File(path, 'r') as f1:
         with h5.File(p2, 'w') as f2:
             if 'data' in f1:
+                # compress new style data
                 log.debug("all at once")
                 f2.require_dataset("data",
                                    f1['data'].shape,
-                                   maxshape=(None, dfcs_vipa.ROWS,
-                                             dfcs_vipa.COLS),
+                                   maxshape=(None, ROWS, COLS),
                                    dtype='u2', compression='lzf')
                 f2["data"][...] = f1["data"][...]
                 done = True
             elif '000001' in f1:
+                # convert and compress old style data
                 log.debug("one by one")
                 length = sum(1 for _ in f1.keys())
+                log.debug("number of arrays in the dataset = %d", length)
+                log.debug("first key = '%s", list(f1.keys())[0])
+                log.debug("last key = '%s", list(f1.keys())[-1])
                 f2.require_dataset("data",
-                                   (length, dfcs_vipa.ROWS,
-                                    dfcs_vipa.COLS),
-                                   maxshape=(None, dfcs_vipa.ROWS,
-                                             dfcs_vipa.COLS),
+                                   (length, ROWS, COLS),
+                                   maxshape=(None, ROWS, COLS),
                                    dtype='u2', compression='lzf')
-                for name in f1.keys():
-                    num = int(name)
-                    f2['data'][num, ...] = f1[name][...]
+                # how many arrays in a chunk
+                arraybytes = ROWS*COLS*2
+                chunkbytes = int(chunkbytes)
+                chunksize = chunkbytes//arraybytes  # number of arrays in a chunk
+                log.debug('number of arrays in a chunk = %d', chunksize)
+                if chunksize == 0:
+                    chunksize = 1
+                elif chunksize > length:
+                    chunksize = length
+                # how many chunks
+                numchunks = length // chunksize  # number of chunks
+                log.debug('number of chunks = %d', numchunks)
+                lastchunk = True if length % chunksize else False  # irregular last chunk
+                log.debug('last chunk irregular? %r', lastchunk)
+                # copy the chunks
+                temp = np.empty((chunksize, ROWS, COLS), dtype=np.uint16)
+                for i in range(numchunks):
+                    for kt, k in zip(range(chunksize), range(i*chunksize, (i+1)*chunksize)):
+                        log.debug("Copying array number %d", k)
+                        temp[kt, ...] = f1['%06d' % k][...]
+                    f2['data'][i*chunksize:(i+1)*chunksize, ...] = temp[...]
+                # copy the last chunk
+                if lastchunk:
+                    for kt, k in zip(range(length % chunksize), range((i+1)*chunksize, length)):
+                        temp[kt, ...] = f1['%06d' % k][...]
+                        log.debug("Copying array number %d", k)
+                    f2['data'][(i+1)*chunksize:length, ...] = temp[:length % chunksize, ...]
                 done = True
 
     if done:
