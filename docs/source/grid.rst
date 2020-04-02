@@ -1,9 +1,9 @@
-.. currentmodule:: pydfcs.grid
+.. currentmodule:: dfcs_vipa.grid
 
-pydfcs.grid
-===========
+dfcs_vipa.grid
+==============
 
-.. automodule:: pydfcs.grid
+.. automodule:: dfcs_vipa.grid
 
    .. rubric:: Functions
 
@@ -20,6 +20,9 @@ pydfcs.grid
       identify_tooth
       closest_to_rio
       coerce_teeth_grid
+      split_by_fringes
       split_by_columns
       teeth_per_stripe
       make_grid_map
+      linear_axis
+      naive_axis

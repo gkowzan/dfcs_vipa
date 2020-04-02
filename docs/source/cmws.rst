@@ -1,26 +1,15 @@
-.. currentmodule:: pydfcs.cmws
+.. currentmodule:: dfcs_vipa.cmws
 
-pydfcs.cmws
-=============
+dfcs_vipa.cmws
+==============
 
-.. automodule:: pydfcs.cmws
-
-   .. rubric:: Comb-cavity lineshape functions
-
-   .. autosummary::
-      :toctree: _autosummary/
-
-      load_comb_psd
-      calc_comb_lineshape
-
+.. automodule:: dfcs_vipa.cmws
 
    .. rubric:: HDF5 conversion functions
 
    .. autosummary::
       :toctree: _autosummary/
 
-      dir_hdf5old2new
-      hdf5old2new
       hdf5old2new_copy
       dir_hdf5old2new_copy
 
@@ -49,14 +38,14 @@ pydfcs.cmws
       :toctree: _autosummary/
 
       lorentz
-      lorentz_conv
       lorentz_diff
+      vp
       voigt
       fit_mode
       fit_modes
 
 
-   .. rubric:: Fitting functions
+   .. rubric:: Nonlinearity calibration
 
    .. autosummary::
       :toctree: _autosummary/

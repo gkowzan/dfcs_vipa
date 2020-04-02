@@ -1,9 +1,9 @@
-.. currentmodule:: pydfcs.collect
+.. currentmodule:: dfcs_vipa.collect
 
-pydfcs.collect
-=============
+dfcs_vipa.collect
+=================
 
-.. automodule:: pydfcs.collect
+.. automodule:: dfcs_vipa.collect
 
    .. rubric:: Camera data functions
 
@@ -15,7 +15,9 @@ pydfcs.collect
       collect_element
       collect
       collect_multi
+      collect_multi_single
       collect_multi_frep_scan
+      collect_multi_frep_scan_single
       beat_range_list
 
 

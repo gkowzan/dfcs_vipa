@@ -1,15 +1,15 @@
-.. currentmodule:: pydfcs
+.. currentmodule:: dfcs_vipa
 
-PyDFCS API Documentation
+dfcs_vipa API Documentation
 ===========================
 .. toctree::
    :maxdepth: 1
 
-   cavity
    cmws
    collect
    grid
    visual
-   happier
-   lineshape
    calibration
+   lineshape
+   experiment
+   units
