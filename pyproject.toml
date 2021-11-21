@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "dfcs_vipa"
+version = "1.0.0"
+description = "Direct frequency comb spectroscopy with a VIPA spectrograph"
+authors = ["Grzegorz Kowzan <grzegorz@kowzan.eu>"]
+homepage = "https://github.com/gkowzan/dfcs_vipa"
+repository = "https://github.com/gkowzan/dfcs_vipa"
+license = "BSD-3-Clause"
+classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Scientific/Engineering :: Physics']
+packages = [
+ { include = "dfcs_vipa/*.py" },
+ { include = "dfcs_vipa/scripts/*.py" },
+ { include = "dfcs_vipa/data/*.py" }
+]
+
+[tool.poetry.scripts]
+labview_grid = "dfcs_vipa.scripts.labview_grid:main"
+combwatch = "dfcs_vipa.scripts.combwatch:main"
+hdf5_convert = "dfcs_vipa.scripts.hdf5_convert:main"
+
+[tool.poetry.dependencies]
+python = ">=3.5"
+numpy = ">=1.18.1"
+h5py = ">=2.10.0"
+xarray = ">=0.15.0"
+scipy = ">=1.4.1"
+lxml = ">=4.5.0"
+
+[tool.poetry.extras]
+doc = ["sphinx", "numpydoc", "sphinx_rtd_theme"]
+interactive = ["matplotlib", "PyQt5", "ipython"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "wheel"]
+build-backend = "poetry.core.masonry.api"

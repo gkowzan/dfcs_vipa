@@ -1,4 +1,0 @@
-include *.md
-include LICENSE.txt
-include conda-list.txt
-include requirements.txt
