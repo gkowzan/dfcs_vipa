@@ -168,19 +168,26 @@ def collect_multi_frep_scan(beat_range, scan_range, frep_range, fmt, fmt_dc,
     NumPy array (a result of collect_multi) with first dimension numbering
     different points on the cavity mode.
 
-    Args:
-    - beat_range: a list of ints numbering measurements within a cavity mode
-      scan,
-    - scan_range: a list of ints numbering independent scans of a cavity
-      mode,
-    - frep_range: a list of ints numbering different freps (jumps),
-    - fmt, fmt_dc: twice-nested format strings, the outer pattern
-      corresponds to the frep number, the inner one to scan-beat number,
-    - alt: if True then the direction of cavity mode scan is reversed every
-      second scan.
+    Parameters
+    ----------
+    beat_range: list of int
+        a list of ints numbering measurements within a cavity mode scan,
+    scan_range: list of int
+        list of ints numbering independent scans of a cavity mode,
+    frep_range: list of ints
+        a list of ints numbering different freps (jumps),
+    fmt : str
+    fmt_dc : str
+        twice-nested format strings, the outer pattern corresponds to the frep
+        number, the inner one to scan-beat number,
+    alt: bool
+        if True then the direction of cavity mode scan is reversed every second
+        scan.
 
-    Returns:
-    - twice-nested dictionary (frep=>scan=>collect_multi).
+    Returns
+    -------
+    dict
+        a twice-nested dictionary (frep=>scan=>collect_multi).
     """
     frep_arr_avgs = {}
     for l in frep_range:

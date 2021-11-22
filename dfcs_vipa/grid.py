@@ -283,12 +283,17 @@ def coerce_teeth_grid(ref, adj):
     element in `adj` within the same column and adds it to a new grid.
     Effectively filters out spurious teeth from `adj`.
 
-    Args:
-    - ref: teeth grid after limiting by RIO rows (list of tuples),
-    - adj: full teeth grid to be filtered (list of tuples).
+    Parameters
+    ----------
+    ref : list of tuple
+        teeth grid after limiting by RIO rows,
+    adj: list of tuple
+        full teeth grid to be filtered.
 
     Returns
-    - filtered adj grid (list of tuples).
+    -------
+    list of tuple
+        filtered `adj` grid
     """
     rows, cols = [], []
     ref_by_cols, adj_by_cols = split_by_columns(ref), split_by_columns(adj)
