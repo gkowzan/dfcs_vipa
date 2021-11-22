@@ -201,7 +201,7 @@ def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
     # threshold = np.mean(arr[-1, :])
     row_min, row_max = np.min(rio_rows), np.max(rio_rows)
     start_row = (row_max+row_min)//2
-    columns = find_maxima(arr[start_row, :], window_len=1, thres=0, order=2)[1:-1]
+    columns = find_maxima(arr[start_row, :], window_len=1, thres=0, order=2)
     grid_points = []
 
     for start_col in columns:
