@@ -1,28 +1,25 @@
-import pickle
+import ctypes
 import logging
+import multiprocessing as mp
 import os
 from pathlib import Path
-import ctypes
-import multiprocessing as mp
-import h5py as h5
+from typing import Union, Sequence, Tuple, Optional
+
+import h5py as h5  # type: ignore
 import numpy as np
-from scipy.interpolate import splev, InterpolatedUnivariateSpline
-from scipy.signal import convolve
-from scipy.special import wofz
-from dfcs_vipa import collect
-from dfcs_vipa import grid
-import dfcs_vipa.lineshape as ls
-from dfcs_vipa.data.cmws import knots
-from dfcs_vipa.experiment import find_maxima, denser, expand, remove_close, fwhm_est
+from scipy.interpolate import splev  # type: ignore
+from scipy.special import wofz  # type: ignore
+
 import dfcs_vipa
+import dfcs_vipa.lineshape as ls
+from dfcs_vipa import collect, grid
+from dfcs_vipa.data.cmws import knots
+from dfcs_vipa.experiment import find_maxima, fwhm_est, remove_close
 
 log = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(name)s: %(message)s',
-)
 
-def hdf5old2new_copy(path, chunkbytes=100*2**20):
+
+def hdf5old2new_copy(path: Union[str, Path], chunkbytes: int=100*2**20):
     """Convert and compress HDF5 measurement data in chunks.
 
     The larger the `chunkbytes` parameter the faster the conversion.
@@ -92,25 +89,47 @@ def hdf5old2new_copy(path, chunkbytes=100*2**20):
         p2.replace(path)
 
 
-def dir_hdf5old2new_copy(path):
+def dir_hdf5old2new_copy(path: Union[str, Path], chunkbytes: int=100*2**20):
+    """Apply :func:`hdf5old2new_copy` to all files in `path` dir."""
     log.debug("Entering '{}'".format(path))
     for entry in os.scandir(path):
         if entry.is_file() and entry.name.endswith('.hdf5'):
             log.debug("Converting '{}'".format(entry.name))
-            hdf5old2new_copy(entry.path)
+            hdf5old2new_copy(entry.path, chunkbytes)
 
 
 #########################################################################
 # Fitting and work-flow                                                 #
 #########################################################################
 # grid helpers
-def make_teeth_grid(arr, grid_points):
+def make_teeth_grid(arr: np.ndarray,
+                    grid_points: Sequence[Tuple[int, int]],
+                    window_len: int=5, order: int=6, spacing: int=10):
+    """Limit `grid_points` to resolved comb modes.
+
+    Parameters
+    ----------
+    arr
+        2D camera image with resolved comb modes.
+    grid_points
+        Grid of points to collect intensities from.
+    window_len
+    order
+        Passed to :func:`find_maxima`.
+    spacing
+        Discard resolved comb modes that are closer than `spacing` pixels.
+
+    Returns
+    -------
+    teeth_grid: list of tuple
+        Points in the grid that overlap with comb modes from `arr`.
+    """
     teeth_spectrum = collect.collect(
         arr, grid.grid2fancy(grid_points), np.array([-1, 0, -1])
     )
     teeth_indices = remove_close(
-        find_maxima(teeth_spectrum, window_len=5, order=6),
-        10)
+        find_maxima(teeth_spectrum, window_len=window_len, order=order),
+        spacing)
 
     grid_points_teeth = [grid_points[i]
                          for i in range(len(grid_points))
@@ -133,7 +152,9 @@ def make_grid_file(grid_file, grid_dc, rio_rows=np.array([0, dfcs_vipa.ROWS])):
 #########################################################################
 # Frequency axis                                                        #
 #########################################################################
-def tooth_number(cw, frep, f0, fbeat=0.0, cavity_fsr=None):
+def tooth_number(cw: float, frep: float, f0: float,
+                 fbeat: float=0.0,
+                 cavity_fsr: Optional[float]=None) -> int:
     """Return tooth number closest to cw for given frep, f0.
 
     If cavity_fsr is not None, then we want to get the tooth number
@@ -144,10 +165,25 @@ def tooth_number(cw, frep, f0, fbeat=0.0, cavity_fsr=None):
     laser.  It can be lower freqency or higher frequency than the CW
     laser.
 
+    Parameters
+    ----------
+    cw
+        CW laser optical frequency.
+    frep
+    f0
+    fbeat
+        Beat note frequency between the CW laser and the comb.
+    cavity_fsr
+        FSR of the cavity
+
+    Returns
+    -------
+    int
+        Absolute number of the comb tooth.
     """
-    beaten_tooth = np.round((cw-f0-fbeat)/frep).astype(np.int)
+    beaten_tooth = np.round((cw-f0-fbeat)/frep).astype(np.int64)
     if cavity_fsr is not None:
-        tooth_shift = np.round(fbeat/(cavity_fsr-frep)).astype(np.int)
+        tooth_shift = np.round(fbeat/(cavity_fsr-frep)).astype(np.int64)
     else:
         tooth_shift = 0
     log.info('CW tooth = {:d}, comb tooth = {:d}'.format(beaten_tooth,
@@ -188,7 +224,7 @@ def vp(x, x0, gam, dop):
 
 
 def voigt(x, x0, gamma, dop, a):
-    """Return the Voigt profile (the real part)."""
+    """Real part of the Voigt profile."""
     return a*np.real(vp(x, x0, gamma, dop))
 
 
@@ -264,17 +300,25 @@ def fit_mode(x, y, prof='lorentz', baseline=None, etalon=None,
         return np.zeros(model.index), np.zeros(model.index)
 
 
-def fit_modes(x, beat_spectrum, nshift=None, prof='lorentz', baseline=None,
+def fit_modes(x: np.ndarray, beat_spectrum: np.ndarray,
+              nshift=None, prof='lorentz', baseline=None,
               etalon=None):
     """Fit cavity modes from the whole measurement.
 
-    Args:
-    - x: relative frequency axis of each cavity mode,
-    - beat_spectrum: 2D NumPy array, first axis - beat note values,
-      second axis - comb teeth;
-    - nshift: (n0, nCW) tuple with the teeth numbers of the first comb
-      tooth in the spectrum and the comb tooth closest to the CW laser;
-    - prof: fitting profile, either 'lorentz' or 'voigt'
+    Parameters
+    ----------
+    x
+        Relative frequency axis, same for each cavity mode.
+    beat_spectrum
+        2D NumPy array, first axis - rel. freq. axis, second axis - comb teeth.
+    nshift
+        (n0, nCW) tuple with the teeth numbers of the first comb tooth in the
+        spectrum and the comb tooth closest to the CW laser.
+    prof
+        Fitting profile, either 'lorentz' or 'voigt'.
+    baseline
+    etalon
+        See :func:`fit_mode`.
     """
     if prof == 'lorentz':
         mode_fits = np.empty((beat_spectrum.shape[1], 2,
@@ -301,7 +345,9 @@ def fit_modes(x, beat_spectrum, nshift=None, prof='lorentz', baseline=None,
 # Calibration                                                           #
 #########################################################################
 def init_calibrate(cal, output_base, shape):
-    """Initialize the arrays for multiprocessing calibration."""
+    """Initialize the arrays for multiprocessing calibration.
+
+    :meta private:"""
     global output_array
     global calibration
 
@@ -310,7 +356,9 @@ def init_calibrate(cal, output_base, shape):
 
 
 def worker_calibrate(i, arr):
-    """Calibrate i-th array."""
+    """Calibrate i-th array.
+
+    :meta private:"""
     output_array[i] = arr*calibration(arr)
 
 

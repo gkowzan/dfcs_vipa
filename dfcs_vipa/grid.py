@@ -1,9 +1,11 @@
 import logging
-import itertools as it
+from typing import Sequence, Tuple, List
+
 import numpy as np
-from dfcs_vipa.experiment import find_maxima, find_index
-from dfcs_vipa.units import nu2wn, nu2lambda, lambda2nu
+
 import dfcs_vipa
+from dfcs_vipa.experiment import find_index, find_maxima
+from dfcs_vipa.units import lambda2nu, nu2lambda, nu2wn
 
 log = logging.getLogger(__name__)
 
@@ -169,7 +171,9 @@ def collect_column(arr, start_row, start_col, row_min, row_max):
     return points
 
 
-def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
+def make_grid(arr: np.ndarray,
+              rio_rows: np.ndarray=np.array([0, dfcs_vipa.ROWS])) ->\
+              List[Tuple[int, int]]:
     """Find coordinates lying on each VIPA diffraction order.
 
     The resultant grid of points is used in further data analysis to
@@ -187,9 +191,9 @@ def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
         image of unresolved comb modes, consisting of almost vertical
         stripes corresponding to different diffraction orders of the
         etalon.
-    start_row : int
-        row of the image from the which the stripe will be tracked to
-        the bottom and to the top of the array.
+    start_row : ndarray
+        2-element array with uppermost and lowermost rows of the image between
+        which the stripe will be tracked.
 
     Returns
     -------
@@ -213,7 +217,7 @@ def make_grid(arr, rio_rows=np.array([0, dfcs_vipa.ROWS])):
     return grid_points[::-1]
 
 
-def grid2fancy(grid):
+def grid2fancy(grid: Sequence[Tuple[int, int]]) -> Tuple[np.ndarray, np.ndarray]:
     """Convert list of tuples to a tuple of rows and cols arrays.
 
     Used for fancy indexing of NumPy array.
@@ -242,12 +246,13 @@ def grid2fancy(grid):
     return rows, cols
 
 
-def fancy2grid(fancy):
+def fancy2grid(fancy: Tuple[np.ndarray, np.ndarray]) -> Sequence[Tuple[int, int]]:
     """Convert a tuple or rows and cols arrays to a list of tuples."""
     return [(r, c) for r, c in zip(fancy[0], fancy[1])]
 
 
-def identify_tooth(small, large):
+def identify_tooth(small: Tuple[np.ndarray, np.ndarray],
+                   large: Tuple[np.ndarray, np.ndarray]) -> int:
     """Return index of first tooth from `small` grid in `large` grid
 
     Parameters
@@ -395,8 +400,8 @@ def linear_axis(grid_fancy, rio_pos, fsr, rio_lam, unit='wavenumber'):
 
     fringe_orders = np.arange(column_total) - rio_column + rio_order
     dispersion = fsr/row_total/rio_order
-    
-    
+
+
 
 def naive_axis(grid_fancy, rio_pos, fsr, rio_lam, unit='wavenumber'):
     """Generate a frequency axis based on fringe-independent linear dispersion law.
@@ -434,10 +439,11 @@ def naive_axis(grid_fancy, rio_pos, fsr, rio_lam, unit='wavenumber'):
         freq_axis = nu2lambda(freq_axis)
 
     return freq_axis
-    
+
 
 if __name__ == '__main__':
     from pathlib import Path
+
     import h5py as h5
     try:
         grid_file = Path('/home/gkowzan/documents/nauka/fizyka/'

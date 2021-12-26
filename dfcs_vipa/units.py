@@ -1,5 +1,5 @@
 """Unit conversion."""
-from scipy.constants import lambda2nu, nu2lambda, c, h, k
+from scipy.constants import lambda2nu, nu2lambda, c, h, k # type: ignore
 
 
 def nu2wn(nu):
