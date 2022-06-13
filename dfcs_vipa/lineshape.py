@@ -634,10 +634,13 @@ def etalon_shifted(x0):
 def polynomial(x, *coeffs):
     """Calculate polynomial values at x.
 
-    Args:
-    - x: n-dimensional numpy array,
-    - coeffs: polynomial coefficients in ascending order with respect to the
-      order of the polynomial term.
+    Parameters
+    ----------
+    x : np.ndarray
+        ND array of independent variable values.
+    coeffs
+        polynomial coefficients in ascending order with respect to the order of
+        the polynomial term.
     """
     return pol.polyval(x, coeffs)
 

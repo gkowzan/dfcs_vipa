@@ -9,14 +9,19 @@ log = logging.getLogger(__name__)
 def grid_overlay(frame, fancy_grid, rio=None):
     """Display a camera frame and a grid on the same image.
 
-    Args:
-    - frame: 2D Numpy array,
-    - fancy_grid: (rows, cols) tuple specifying spectral elements'
-      positions,
-    - rio: (row_min, row_max) tuple.
+    Parameters
+    ----------
+    frame
+        2D Numpy array,
+    fancy_grid
+        (rows, cols) tuple specifying spectral elements' positions,
+    rio
+        (row_min, row_max) tuple.
 
-    Returns:
-    - matplotlib figure object
+    Returns
+    ------
+    object
+        matplotlib figure object
     """
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm

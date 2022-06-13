@@ -347,12 +347,15 @@ def split_by_columns(fancy_grid):
 def teeth_per_stripe(fancy_grid):
     """Return the number of comb teeth per VIPA stripe as seen by the grid.
 
-    Args:
-    - rows: a sequence of row numbers with comb teeth sorted spectrally,
-      i.e. the rows part of a fancy grid.
+    Parameters
+    ----------
+    fancy_grid
+        Fancy grid.
 
-    Returns:
-    - list containing the amount of comb teeth per stripe.
+    Returns
+    -------
+    list
+        List containing the amount of comb teeth per stripe.
     """
     grid_by_columns = split_by_columns(fancy_grid)
     counts = np.array([col.size for col in grid_by_columns[0]])

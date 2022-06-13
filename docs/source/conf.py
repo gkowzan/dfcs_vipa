@@ -82,7 +82,6 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'matplotlib': ('https://matplotlib.org/', None),
     'xarray': ('http://xarray.pydata.org/en/stable/', None),
-    'molspecutils': ('/home/grz/python/packages/molspecutils/docs/_build/html/', None)
 }
 
 # -- pygments
